@@ -2,8 +2,24 @@ import streamlit as st
 
 from micro_economy_ledger_streamlit import *
 
+import dill as pickle
+import base64
+
 if 'ledger' not in st.session_state:
-    st.session_state.ledger = Ledger()
+
+    if 'ledger' in st.query_params:
+
+        encoded_ledger = st.query_params.ledger
+
+        serialized_ledger = base64.urlsafe_b64decode(encoded_ledger)
+
+        # ledger = pickle.loads(serialized_ledger)
+
+        st.session_state.ledger = pickle.loads(serialized_ledger)
+
+    else:
+
+        st.session_state.ledger = Ledger()
 
 # ledger = Ledger()
 
@@ -88,6 +104,17 @@ with st.sidebar.expander("deposit gold", expanded=False):
     if st.button("Deposit gold"):    
         deposit_gold(ledger, date, person, bank, amount)
 
+import random
+
+with st.sidebar.expander('get loan', expanded=False):
+
+    date   = st.text_input("Date ", "2020-01-01", key=random.random())
+    person = st.text_input("Person   ", "person_a", key=random.random())
+    bank   = st.text_input("Bank", "bank_a", key=random.random())
+    amount = st.number_input("Amount ", value=100)
+
+    if st.button("Get loan"):
+        get_loan(ledger, date, person, bank, amount)
 
 st.sidebar.markdown('# Presets')
 
@@ -166,3 +193,43 @@ history_of_balances(ledger)
 # else:
 #     bank = st.selectbox("Bank", banks)
 
+# import pickle
+
+# serialized_ledger = pickle.dumps(ledger)
+
+# st.write(serialized_ledger)
+
+# st.write(type(ledger))
+
+
+
+
+serialized_ledger = pickle.dumps(ledger)
+
+encoded_ledger = base64.urlsafe_b64encode(serialized_ledger).decode('utf-8')
+
+# st.write(encoded_ledger)
+
+# st.write(type(encoded_ledger))
+
+# st.write(len(encoded_ledger))
+
+# st.write(serialized_ledger)
+
+# st.write(type(serialized_ledger))
+
+# st.query_params.abc = 123
+# st.query_params.bcd = 234
+
+st.query_params.ledger = encoded_ledger
+
+
+# st.write(list(st.query_params.keys()))
+
+# if 'ledger' in st.query_params:
+#     10
+# else:
+#     20
+
+
+# st.write(type(st.query_params))

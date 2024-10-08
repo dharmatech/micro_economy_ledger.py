@@ -3,6 +3,7 @@ from typing import List, Dict, Generator
 from decimal import Decimal
 import datetime
 
+# ----------------------------------------------------------------------
 @dataclass
 class Entry:
     description: str
@@ -27,7 +28,9 @@ class Ledger:
     def display_balance(self):
         for entry in self.entries():
             print(f"{entry.description}: {entry.amount}")
-
+# ----------------------------------------------------------------------
+# actions
+# ----------------------------------------------------------------------
 def get_substrings(input_str: str) -> List[str]:
     result = []
     parts = input_str.split(':')
@@ -135,6 +138,36 @@ def deposit_cash(ledger: Ledger, date: str, person: str, bank: str, amount: Deci
 # Standalone variable (previously field in Utils)
 reserve_ratio: Decimal = Decimal('0.1')
 
+# get_loan : cash version
+
+# def get_loan(ledger: Ledger, date: str, person: str, bank: str, amount: Decimal):
+    
+#     reserves = sum(entry.amount for entry in ledger.entries() if entry.description.startswith(f"{bank}:assets:reserves"))
+#     deposits = sum(entry.amount for entry in ledger.entries() if entry.description.startswith(f"{bank}:liabilities:deposits"))
+    
+#     minimum_reserves = deposits * reserve_ratio
+#     proposed_reserves = reserves - amount
+
+#     # available_for_loan = reserves - minimum_reserves
+
+#     # print(f"minimum_reserves: {minimum_reserves}")
+#     # print(f"proposed_reserves: {proposed_reserves}")
+    
+#     if proposed_reserves < minimum_reserves:
+#         print("Insufficient reserves")
+#         return
+
+#     ledger.transactions.append(Transaction(
+#         date=date,
+#         description=f"get_loan: {person} <- {bank}",
+#         entries=[
+#             Entry(description=f"{person}:assets:cash", amount=amount),
+#             Entry(description=f"{person}:liabilities:loans:{bank}", amount=-amount),
+#             Entry(description=f"{bank}:assets:reserves", amount=-amount),
+#             Entry(description=f"{bank}:assets:loans", amount=amount)
+#         ]
+#     ))
+
 def get_loan(ledger: Ledger, date: str, person: str, bank: str, amount: Decimal):
     
     reserves = sum(entry.amount for entry in ledger.entries() if entry.description.startswith(f"{bank}:assets:reserves"))
@@ -156,13 +189,19 @@ def get_loan(ledger: Ledger, date: str, person: str, bank: str, amount: Decimal)
         date=date,
         description=f"get_loan: {person} <- {bank}",
         entries=[
-            Entry(description=f"{person}:assets:cash", amount=amount),
+            Entry(description=f"{person}:assets:gold", amount=amount),
             Entry(description=f"{person}:liabilities:loans:{bank}", amount=-amount),
-            Entry(description=f"{bank}:assets:reserves", amount=-amount),
+            Entry(description=f"{bank}:assets:reserves:gold", amount=-amount),
             Entry(description=f"{bank}:assets:loans", amount=amount)
         ]
     ))
 
+
+
+
+# ----------------------------------------------------------------------
+# display
+# ----------------------------------------------------------------------
 def deep_clone_ledger(ledger: Ledger) -> Ledger:
     return Ledger(transactions=[
         Transaction(
@@ -284,15 +323,15 @@ def display_balances_with_changes(ledger_a: Ledger, ledger_b: Ledger):
 
 
 
-    max_category_length = max(len(category) for category in categories)
+    # max_category_length = max(len(category) for category in categories)
 
-    # max_category_length = max(len(transform_description(category)) for category in categories)
+    max_category_length = max(len(transform_description(category)) for category in categories)
     
     for category in categories:
         total_a = sum(entry.amount for entry in entries_a if entry.description.startswith(category))
         total_b = sum(entry.amount for entry in entries_b if entry.description.startswith(category))
 
-        # category = transform_description(category)
+        category = transform_description(category)
 
         font_family = '"Source Code Pro", monospace'
         style = f"font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;"
