@@ -5,6 +5,22 @@ from micro_economy_ledger_streamlit import *
 import dill as pickle
 import base64
 
+# if 'ledger' not in st.session_state:
+
+#     if 'ledger' in st.query_params:
+
+#         encoded_ledger = st.query_params.ledger
+
+#         serialized_ledger = base64.urlsafe_b64decode(encoded_ledger)
+
+#         # ledger = pickle.loads(serialized_ledger)
+
+#         st.session_state.ledger = pickle.loads(serialized_ledger)
+
+#     else:
+
+#         st.session_state.ledger = Ledger()
+
 if 'ledger' not in st.session_state:
 
     if 'ledger' in st.query_params:
@@ -195,96 +211,15 @@ if st.sidebar.button("Clear ledger"):
 
     ledger = st.session_state.ledger
 
-
-
-
-
-
-
-
-
-
-
-
-
 history_of_balances(ledger)
 
-# display_money_supply(ledger)
 
 # ----------------------------------------------------------------------
-
-# for each bank, display amount available for loan
-
-# bank_descriptions = [
-#     entry.description 
-#     for entry in ledger.entries()
-#     if entry.description.startswith("bank")
-# ]
-
-# bank_descriptions
-
-# banks = [desc.split(":")[0] for desc in bank_descriptions]
-
-# get unique banks
-
-# banks = sorted(list(set(banks)))
-
-# banks
-
-
-# st.selectbox("Bank", ["bank_a", "bank_b"])
-
-
-# banks = sorted(list(set(
-#     entry.description.split(":")[0]
-#     for entry in ledger.entries()
-#     if entry.description.startswith("bank")
-# )))
-
-# if st.checkbox('New bank'):
-#     new_bank = st.text_input("Bank")
-#     if st.button("Add bank"):
-#         banks.append(new_bank)
-# else:
-#     bank = st.selectbox("Bank", banks)
-
-# import pickle
+# serialize
+# ----------------------------------------------------------------------
 
 # serialized_ledger = pickle.dumps(ledger)
 
-# st.write(serialized_ledger)
+# encoded_ledger = base64.urlsafe_b64encode(serialized_ledger).decode('utf-8')
 
-# st.write(type(ledger))
-
-
-
-
-serialized_ledger = pickle.dumps(ledger)
-
-encoded_ledger = base64.urlsafe_b64encode(serialized_ledger).decode('utf-8')
-
-# st.write(encoded_ledger)
-
-# st.write(type(encoded_ledger))
-
-# st.write(len(encoded_ledger))
-
-# st.write(serialized_ledger)
-
-# st.write(type(serialized_ledger))
-
-# st.query_params.abc = 123
-# st.query_params.bcd = 234
-
-st.query_params.ledger = encoded_ledger
-
-
-# st.write(list(st.query_params.keys()))
-
-# if 'ledger' in st.query_params:
-#     10
-# else:
-#     20
-
-
-# st.write(type(st.query_params))
+# st.query_params.ledger = encoded_ledger
