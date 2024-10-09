@@ -60,25 +60,42 @@ def grow_apples(ledger: Ledger, date: str, name: str, amount: Decimal):
         ]
     ))
 
-def barter(ledger: Ledger, date: str, name_a: str, name_b: str, asset_a: str, asset_b: str, amount: Decimal):
+def buy_treasury_securities(ledger: Ledger, date: str, name: str, amount: Decimal):
+    ledger.transactions.append(Transaction(
+        date=date,
+        description=f"buy_treasury_securities: {name}",
+        entries=[
+            # Entry(description=f"{name}:assets:treasury_securities", amount=amount),
+            Entry(f'{name}:assets:gold',              -amount),
+            Entry(f'fed:liabilities:tga:assets:gold',  amount),
+
+            Entry(f'{name}:assets:securities',                    amount),
+            Entry(f'fed:liabilities:tga:liabilities:securities', -amount)
             
-    asset_a_available = sum(
-        entry.amount 
-        for entry in ledger.entries() 
-        if entry.description == f"{name_a}:assets:{asset_a}")
+        ]
+    ))
 
-    asset_b_available = sum(
-        entry.amount
-        for entry in ledger.entries()
-        if entry.description == f"{name_b}:assets:{asset_b}")
+def barter(ledger: Ledger, date: str, name_a: str, name_b: str, asset_a: str, asset_b: str, amount: Decimal, check=True):
 
-    if asset_a_available < amount:
-        st.info(f"Insufficient {asset_a}")
-        return
-    
-    if asset_b_available < amount:
-        st.info(f"Insufficient {asset_b}")
-        return
+    if check:
+
+        asset_a_available = sum(
+            entry.amount 
+            for entry in ledger.entries() 
+            if entry.description == f"{name_a}:assets:{asset_a}")
+
+        asset_b_available = sum(
+            entry.amount
+            for entry in ledger.entries()
+            if entry.description == f"{name_b}:assets:{asset_b}")
+
+        if asset_a_available < amount:
+            st.info(f"Insufficient {asset_a}")
+            return
+        
+        if asset_b_available < amount:
+            st.info(f"Insufficient {asset_b}")
+            return
 
     ledger.transactions.append(Transaction(
         date=date,
@@ -406,14 +423,16 @@ def display_money_supply(ledger: Ledger):
     # st.text(f"  Gold:     {gold}")
     # st.text(f"  Total:    {cash + gold + -deposits}")
 
-    st.code(
-        f"""    
-        Money supply:
-            Deposits: {-deposits}
-            Cash:     {cash}
-            Gold:     {gold}
-            Total:    {cash + gold + -deposits}
-        """)
+    if cash + gold + -deposits != 0:
+
+        st.code(
+            f"""    
+            Money supply:
+                Deposits: {-deposits}
+                Cash:     {cash}
+                Gold:     {gold}
+                Total:    {cash + gold + -deposits}
+            """)
 
 
 # ----------------------------------------------------------------------

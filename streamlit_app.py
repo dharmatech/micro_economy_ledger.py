@@ -73,7 +73,7 @@ with st.sidebar.expander("dig for gold", expanded=False):
         person = st.selectbox("Person", persons)
 
     # person = st.text_input("Person", "person_a")
-    amount = st.number_input("Amount", 100)    
+    amount = st.number_input("Amount", value=100)    
 
     if st.button("go"):
         dig_for_gold(ledger, date, person, amount)
@@ -106,9 +106,10 @@ with st.sidebar.expander("barter", expanded=False):
     asset_a = st.text_input("Asset A  ", "gold")
     asset_b = st.text_input("Asset B  ", "apples")
     amount = st.number_input("Amount   ", value=100)    
-
+    check = st.checkbox(label='Check available assets', value=True)
+        
     if st.button("go  "):
-        barter(ledger, date, person_a, person_b, asset_a, asset_b, amount)
+        barter(ledger, date, person_a, person_b, asset_a, asset_b, amount, check)
 
 with st.sidebar.expander("deposit gold", expanded=False):
 
@@ -129,6 +130,42 @@ with st.sidebar.expander('get loan', expanded=False):
 
     if st.button("Get loan"):
         get_loan(ledger, date, person, bank, amount)
+
+
+def fed_money_printer(ledger: Ledger, date: str, amount: Decimal):
+    
+    ledger.transactions.append(
+        Transaction(
+            date=date,
+            description=f'Fed fires up money printer',
+            entries=[
+                Entry('fed:assets:reserves', amount),
+                Entry('fed:liabilities:money_printer', -amount)
+            ]
+        ))
+
+with st.sidebar.expander('Fed money printer', expanded=False):
+    
+    date = st.text_input("Date    ", "2020-01-01")
+    amount = st.number_input("Amount ", value=1)
+
+    if st.button("Fire up money printer"):
+        fed_money_printer(ledger, date, amount)
+
+
+with st.sidebar.expander("Buy securities from U.S. Treasury", expanded=False):
+
+    date = st.text_input("Date     ", "2020-01-01")
+    entity = st.text_input("Entity ", "person_a")
+    amount = st.number_input("Amount   ", value=1)    
+
+    if st.button("go   "):
+        buy_treasury_securities(ledger, date, entity, amount)
+
+
+
+
+# ----------------------------------------------------------------------
 
 st.sidebar.markdown('# Presets')
 
@@ -201,6 +238,61 @@ if st.sidebar.button("Iterate loan"):
         loan_amount = amount_available_for_loan_at_bank(ledger, "bank_a")
        
         get_loan(ledger, "2020-01-01", "person_a", "bank_a", loan_amount)
+
+
+def abc():
+    st.markdown("### Code:")
+
+    with st.echo():
+
+        # Commercial bank sells treasuries to Fed
+
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Fed fires up money printer',
+                entries=[
+                    Entry('fed:assets:reserves', 1),
+                    Entry('fed:liabilities:money_printer', -1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Bank sends securities to Fed',
+                entries=[
+                    Entry('bank:assets:securities', -1),
+                    Entry('fed:assets:securities',   1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Bank gets reserves',
+                entries=[
+                    Entry('bank:assets:reserves',   1),
+                    Entry('fed:assets:reserves', -1)
+                ]
+            ))
+
+
+def cb101_1():
+    st.markdown("### Code:")
+
+    with st.echo():
+
+        # Commercial bank sells treasuries to Fed
+
+        dig_for_gold(ledger, "2020-01-01", "bank", 1)
+        buy_treasury_securities(ledger, "2020-01-01", "bank", 1)
+        fed_money_printer(ledger, "2020-01-01", 1)
+        barter(ledger, "2020-01-01", "fed", "bank", "reserves", "securities", 1)
+
+with st.sidebar.expander("Central Banking 101", expanded=False):
+    st.button('Bank sells treasuries to Fed (simple)', on_click=abc)
+    st.button('Bank sells treasuries to Fed',          on_click=cb101_1)
 
 st.sidebar.divider()
 
