@@ -247,35 +247,39 @@ def abc():
 
         # Commercial bank sells treasuries to Fed
 
-        ledger.transactions.append(
-            Transaction(
-                date='2020-01-01',
-                description=f'Fed fires up money printer',
-                entries=[
-                    Entry('fed:assets:reserves', 1),
-                    Entry('fed:liabilities:money_printer', -1)
-                ]
-            ))
+        # ledger.transactions.append(
+        #     Transaction(
+        #         date='2020-01-01',
+        #         description=f'Fed fires up money printer',
+        #         entries=[
+        #             Entry('fed:assets:reserves', 1),
+        #             Entry('fed:liabilities:money_printer', -1)
+        #         ]
+        #     ))
+
+        # fed_money_printer(ledger, "2020-01-01", 1)
+
+        barter(ledger, "2020-01-01", "fed", "bank", "reserves", "securities", 1, check=False)
         
-        ledger.transactions.append(
-            Transaction(
-                date='2020-01-01',
-                description=f'Bank sends securities to Fed',
-                entries=[
-                    Entry('bank:assets:securities', -1),
-                    Entry('fed:assets:securities',   1)
-                ]
-            ))
+        # ledger.transactions.append(
+        #     Transaction(
+        #         date='2020-01-01',
+        #         description=f'Bank sends securities to Fed',
+        #         entries=[
+        #             Entry('bank:assets:securities', -1),
+        #             Entry('fed:assets:securities',   1)
+        #         ]
+        #     ))
         
-        ledger.transactions.append(
-            Transaction(
-                date='2020-01-01',
-                description=f'Bank gets reserves',
-                entries=[
-                    Entry('bank:assets:reserves',   1),
-                    Entry('fed:assets:reserves', -1)
-                ]
-            ))
+        # ledger.transactions.append(
+        #     Transaction(
+        #         date='2020-01-01',
+        #         description=f'Bank gets reserves',
+        #         entries=[
+        #             Entry('bank:assets:reserves',   1),
+        #             Entry('fed:assets:reserves', -1)
+        #         ]
+        #     ))
 
 
 def cb101_1():
