@@ -120,13 +120,11 @@ with st.sidebar.expander("deposit gold", expanded=False):
     if st.button("Deposit gold"):    
         deposit_gold(ledger, date, person, bank, amount)
 
-import random
-
 with st.sidebar.expander('get loan', expanded=False):
 
-    date   = st.text_input("Date ", "2020-01-01", key=random.random())
-    person = st.text_input("Person   ", "person_a", key=random.random())
-    bank   = st.text_input("Bank", "bank_a", key=random.random())
+    date   = st.text_input("Date ", "2020-01-01", key=' ')
+    person = st.text_input("Person     ", "person_a")
+    bank   = st.text_input("Bank", "bank_a", key='')
     amount = st.number_input("Amount ", value=100)
 
     if st.button("Get loan"):
