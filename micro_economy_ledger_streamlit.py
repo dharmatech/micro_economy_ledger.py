@@ -44,7 +44,8 @@ def dig_for_gold(ledger: Ledger, date: str, name: str, amount: Decimal):
         description=f"dig for gold: {name}",
         entries=[
             Entry(description=f"{name}:assets:gold", amount=amount),
-            Entry(description=f"{name}:equity", amount=-amount)
+            # Entry(description=f"{name}:equity", amount=-amount)
+            Entry(description=f"{name}:equity:mining", amount=-amount)
         ]
     ))
 
@@ -54,7 +55,8 @@ def grow_apples(ledger: Ledger, date: str, name: str, amount: Decimal):
         description=f"grow_apples: {name}",
         entries=[
             Entry(description=f"{name}:assets:apples", amount=amount),
-            Entry(description=f"{name}:equity", amount=-amount)
+            # Entry(description=f"{name}:equity", amount=-amount)
+            Entry(description=f"{name}:equity:farming", amount=-amount)
         ]
     ))
 
