@@ -11,4 +11,6 @@ https://x.com/dharmatrade/status/1843852714645832031
 
 https://x.com/dharmatrade/status/1844140504755437804
 
+### Live simulator
 
+https://dharmatech.dev:8503/micro-economy-ledger/
