@@ -7,9 +7,15 @@ Simulator for a micro economy when an emphasis on the balance sheet effects.
 
 https://x.com/dharmatrade/status/1843852714645832031
 
-### Central bank example
+### Central bank examples
+
+Central Banking 101 : chapter 1 example 1:
 
 https://x.com/dharmatrade/status/1844140504755437804
+
+Central Banking 101 : chapter 1 example 2:
+
+https://x.com/dharmatrade/status/1845181850714525833
 
 ### Live simulator
 
