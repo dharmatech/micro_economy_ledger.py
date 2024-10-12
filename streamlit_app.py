@@ -281,7 +281,6 @@ def abc():
         #         ]
         #     ))
 
-
 def cb101_1():
     st.markdown("### Code:")
 
@@ -294,10 +293,167 @@ def cb101_1():
         fed_money_printer(ledger, "2020-01-01", 1)
         barter(ledger, "2020-01-01", "fed", "bank", "reserves", "securities", 1)
 
-with st.sidebar.expander("Central Banking 101", expanded=False):
-    st.button('Bank sells treasuries to Fed (simple)', on_click=abc)
-    st.button('Bank sells treasuries to Fed',          on_click=cb101_1)
+# ----------------------------------------------------------------------
+# CB101 : chapter 1 : example 2
+# corporation sells treasuries to Fed
+# ----------------------------------------------------------------------
 
+def cb101_ch1_ex2_simple():
+
+    st.markdown("### Code:")
+
+    st.markdown("Note: in this case, the Fed balance sheet isn't displayed")
+
+    with st.echo():
+
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'corporation hands over securities for bank deposits',
+                entries=[
+                    Entry('corp:assets:securities',    -1),
+                    Entry('corp:assets:deposits:bank',  1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'bank',
+                entries=[
+                    Entry('bank:assets:reserves',            1),
+                    Entry('bank:liabilities:deposits:corp', -1)
+                ]
+            ))        
+
+        # ledger.transactions.append(
+        #     Transaction(
+        #         date='2020-01-01',
+        #         description=f'corporation hands over securities for bank deposits',
+        #         entries=[
+        #             Entry('corp:assets:securities',    -1),
+        #             Entry('corp:assets:deposits:bank',  1)
+        #         ]
+        #     ))
+        
+        # ledger.transactions.append(
+        #     Transaction(
+        #         date='2020-01-01',
+        #         description=f'bank',
+        #         entries=[
+        #             Entry('bank:assets:reserves',            1),
+        #             Entry('corp:liabilities:deposits:corp', -1)
+        #         ]
+        #     ))        
+
+def cb101_ch1_ex2_with_fed():
+    st.markdown("### Code:")
+
+    st.markdown("Note: Now we see the Fed balance sheet, however, the economy isn't bootstrapped")
+
+    with st.echo():
+
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'corp sends securities to Fed',
+                entries=[
+                    Entry('corp:assets:securities', -1),
+                    Entry('fed:assets:securities',   1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Fed sends reserves to bank',
+                entries=[
+                    Entry('fed:liabilities:reserves', -1),
+                    Entry('bank:assets:reserves',      1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Bank gives deposits to corp',
+                entries=[
+                    Entry('bank:liabilities:deposits:corp', -1),
+                    Entry('corp:assets:deposits:bank',       1)
+                ]
+            ))
+
+        # barter(ledger, '2020-01-01', 'corp', 'fed', 'securities', 'reserves', 1, check=False)
+
+        # # Commercial bank sells treasuries to Fed
+
+        # dig_for_gold(ledger, "2020-01-01", "bank", 1)
+        # buy_treasury_securities(ledger, "2020-01-01", "bank", 1)
+        # fed_money_printer(ledger, "2020-01-01", 1)
+        # barter(ledger, "2020-01-01", "fed", "bank", "reserves", "securities", 1)
+
+def cb101_ch1_ex2_full():
+    st.markdown("### Code:")
+
+    st.markdown("Note: Now we see the Fed balance sheet, and the economy is bootstrapped from nothing")
+
+    with st.echo():
+
+        dig_for_gold(ledger, "2020-01-01", "corp", 1)
+
+        buy_treasury_securities(ledger, "2020-01-01", "corp", 1)
+
+        fed_money_printer(ledger, "2020-01-01", 1)
+
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'corp sends securities to Fed',
+                entries=[
+                    Entry('corp:assets:securities', -1),
+                    Entry('fed:assets:securities',   1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Fed sends reserves to bank',
+                entries=[
+                    # Entry('fed:liabilities:reserves', -1),
+                    Entry('fed:assets:reserves', -1),
+                    Entry('bank:assets:reserves',      1)
+                ]
+            ))
+        
+        ledger.transactions.append(
+            Transaction(
+                date='2020-01-01',
+                description=f'Bank gives deposits to corp',
+                entries=[
+                    Entry('bank:liabilities:deposits:corp', -1),
+                    Entry('corp:assets:deposits:bank',       1)
+                ]
+            ))
+
+with st.sidebar.expander("Central Banking 101", expanded=False):
+
+    st.markdown('Bank sells treasuries to Fed:')
+
+    # st.button('Bank sells treasuries to Fed (simple)', on_click=abc)
+    # st.button('Bank sells treasuries to Fed',          on_click=cb101_1)
+
+    st.button('with Fed ', on_click=abc)
+    st.button('full ',          on_click=cb101_1)
+
+    # st.divider()    
+
+    st.markdown('Corporation sells treasuries to Fed:')
+
+    st.button('simple',   on_click=cb101_ch1_ex2_simple)
+    st.button('with Fed', on_click=cb101_ch1_ex2_with_fed)
+    st.button('full',     on_click=cb101_ch1_ex2_full)
+# ----------------------------------------------------------------------
 st.sidebar.divider()
 
 if st.sidebar.button("Clear ledger"):
