@@ -5,6 +5,15 @@ from micro_economy_ledger_streamlit import *
 import dill as pickle
 import base64
 
+import micro_economy_ledger_streamlit
+
+micro_economy_ledger_streamlit.reserve_ratio = st.sidebar.number_input(
+    "Reserve Ratio", min_value=0.0, max_value=1.0, value=0.1, step=0.01)
+
+reserve_ratio = micro_economy_ledger_streamlit.reserve_ratio
+
+st.sidebar.markdown(f'Max money multiplier: {1 / reserve_ratio:.2f}')
+
 # if 'ledger' not in st.session_state:
 
 #     if 'ledger' in st.query_params:
@@ -40,6 +49,8 @@ if 'ledger' not in st.session_state:
 # ledger = Ledger()
 
 ledger = st.session_state.ledger
+
+# st.sidebar.markdown(f'Monetary base: {monetary_base(ledger):.2f}')
 
 st.sidebar.markdown('# Transactions')
 
@@ -238,6 +249,97 @@ if st.sidebar.button("Iterate loan"):
         loan_amount = amount_available_for_loan_at_bank(ledger, "bank_a")
        
         get_loan(ledger, "2020-01-01", "person_a", "bank_a", loan_amount)
+
+# if st.sidebar.button('Daisy chain loans'):
+
+#     st.markdown("### Code:")
+
+#     with st.echo():
+
+#         dig_for_gold(ledger, "2020-01-01", "person_0", 100)
+
+#         deposit_gold(ledger, "2020-01-01", "person_0", "bank_0", 100)
+
+        
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_0")
+
+#         get_loan(ledger, "2020-01-01", "person_1", "bank_0", max_loan)
+
+#         deposit_gold(ledger, "2020-01-01", "person_1", "bank_1", max_loan)
+
+
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_1")
+
+#         get_loan(ledger, "2020-01-01", "person_2", "bank_1", max_loan)
+
+#         deposit_gold(ledger, "2020-01-01", "person_2", "bank_2", max_loan)
+
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_2")
+
+#         get_loan(ledger, "2020-01-01", "person_3", "bank_2", max_loan)
+
+#         deposit_gold(ledger, "2020-01-01", "person_3", "bank_3", max_loan)
+
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_3")
+
+#         get_loan(ledger, "2020-01-01", "person_4", "bank_3", max_loan)
+
+#         deposit_gold(ledger, "2020-01-01", "person_4", "bank_4", max_loan)
+
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_4")
+
+#         get_loan(ledger, "2020-01-01", "person_5", "bank_4", max_loan)
+
+#         deposit_gold(ledger, "2020-01-01", "person_5", "bank_5", max_loan)
+
+#         max_loan = amount_available_for_loan_at_bank(ledger, "bank_5")
+
+#         get_loan(ledger, "2020-01-01", "person_6", "bank_5", max_loan)
+
+
+# with st.sidebar.expander("Daisy chain loans", expanded=False):
+
+#     n = st.number_input("Number of iterations", value=10)
+
+#     if st.button("go    "):
+
+#         dig_for_gold(ledger, "2020-01-01", "person_0", 100)
+
+#         deposit_gold(ledger, "2020-01-01", "person_0", "bank_0", 100)
+        
+#         for i in range(1, n):
+        
+#             max_loan = amount_available_for_loan_at_bank(ledger, f"bank_{i-1}")
+
+#             get_loan(ledger, "2020-01-01", f"person_{i}", f"bank_{i-1}", max_loan)
+
+#             deposit_gold(ledger, "2020-01-01", f"person_{i}", f"bank_{i}", max_loan)
+        
+
+
+with st.sidebar.expander("Daisy chain loans", expanded=False):
+
+    # n = st.number_input("Number of iterations", value=10)
+
+    if st.button('initialize'):
+
+        dig_for_gold(ledger, "2020-01-01", "person_0", 100)
+
+        deposit_gold(ledger, "2020-01-01", "person_0", "bank_0", 100)        
+
+        st.session_state.i = 1
+
+    if st.button('iterate'):
+
+        i = st.session_state.i
+
+        max_loan = amount_available_for_loan_at_bank(ledger, f"bank_{i-1}")
+
+        get_loan(ledger, "2020-01-01", f"person_{i}", f"bank_{i-1}", max_loan)
+
+        deposit_gold(ledger, "2020-01-01", f"person_{i}", f"bank_{i}", max_loan)
+
+        st.session_state.i += 1        
 
 
 def abc():
@@ -461,7 +563,12 @@ if st.sidebar.button("Clear ledger"):
 
     ledger = st.session_state.ledger
 
-history_of_balances(ledger)
+
+
+
+show_gold = st.sidebar.checkbox('Show gold', value=False)
+    
+history_of_balances(ledger, display_gold=show_gold)
 
 
 # ----------------------------------------------------------------------
