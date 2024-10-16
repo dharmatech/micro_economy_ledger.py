@@ -5,31 +5,84 @@ import datetime
 
 import streamlit as st
 
-# ----------------------------------------------------------------------
+
+# # ----------------------------------------------------------------------
+# @dataclass
+# class Entry:
+#     description:    str
+#     amount:         Decimal
+
+#     quantity:       Decimal = 0
+#     unit:           str     = ''
+#     price_per_unit: Decimal = 0
+
+#     def amount_(self):
+#         if self.unit == '':
+#             return self.amount
+#         else:
+#             return self.quantity * self.price_per_unit
+
 @dataclass
-class Entry:
+class GeneralEntry:
     description: str
+
+@dataclass
+class Entry(GeneralEntry):
     amount: Decimal
+
+    def amount_(self):
+        return self.amount
+    
+    def clone(self):
+        return Entry(description=self.description, amount=self.amount)
+
+@dataclass
+class StockEntry(GeneralEntry):
+    quantity: Decimal
+    unit: str
+    price_per_unit: Decimal
+
+    def amount_(self):
+        return self.quantity * self.price_per_unit
+    
+    def clone(self):
+        return StockEntry(
+            description=self.description, 
+            quantity=self.quantity, 
+            unit=self.unit, 
+            price_per_unit=self.price_per_unit)
+
 
 @dataclass
 class Transaction:
     date: str
     description: str
-    entries: List[Entry] = field(default_factory=list)
+    # entries: List[Entry] = field(default_factory=list)
+    entries: List[GeneralEntry] = field(default_factory=list)
 
 @dataclass
 class Ledger:
     transactions: List[Transaction] = field(default_factory=list)
 
-    def entries_gen(self) -> Generator[Entry, None, None]:
+    # def entries_gen(self) -> Generator[Entry, None, None]:
+    #     return (
+    #         entry 
+    #         for transaction in self.transactions 
+    #         for entry       in transaction.entries)
+
+    def entries_gen(self) -> Generator[GeneralEntry, None, None]:
         return (
             entry 
             for transaction in self.transactions 
             for entry       in transaction.entries)
-
-    def entries(self) -> List[Entry]:
-        return list(self.entries_gen())
     
+
+    # def entries(self) -> List[Entry]:
+    #     return list(self.entries_gen())
+    
+    def entries(self) -> List[GeneralEntry]:
+        return list(self.entries_gen())    
+
     def display_balance(self):
         for entry in self.entries():
             print(f"{entry.description}: {entry.amount}")
@@ -236,7 +289,8 @@ def deep_clone_ledger(ledger: Ledger) -> Ledger:
         Transaction(
             date=transaction.date,
             description=transaction.description,
-            entries=[Entry(description=entry.description, amount=entry.amount) for entry in transaction.entries]
+            # entries=[Entry(description=entry.description, amount=entry.amount) for entry in transaction.entries]
+            entries=[entry.clone() for entry in transaction.entries]
         ) for transaction in ledger.transactions
     ])
 
@@ -338,7 +392,22 @@ def display_balances_with_changes(ledger_a: Ledger, ledger_b: Ledger):
     
     entries_a = list(ledger_a.entries())
     entries_b = list(ledger_b.entries())
-        
+
+
+
+
+    # st.write(entries_a)
+    # st.write(entries_b)
+
+    # categories = sorted(
+    #     set(
+    #         substring 
+    #         for entries in [entries_a, entries_b] 
+    #         for entry in entries 
+    #         for substring in get_substrings(entry.description)
+    #     )
+    # )
+
     categories = sorted(
         set(
             substring 
@@ -348,46 +417,68 @@ def display_balances_with_changes(ledger_a: Ledger, ledger_b: Ledger):
         )
     )
 
+
+    # st.write(categories)
+
+    # st.write(entries_b)
+
     output = ""
-
-
-
-    # max_category_length = max(len(category) for category in categories)
-
+    
     max_category_length = max(len(transform_description(category)) for category in categories)
     
     for category in categories:
-        total_a = sum(entry.amount for entry in entries_a if entry.description.startswith(category))
-        total_b = sum(entry.amount for entry in entries_b if entry.description.startswith(category))
+        
+        total_a = sum(entry.amount_() for entry in entries_a if entry.description.startswith(category))
+        total_b = sum(entry.amount_() for entry in entries_b if entry.description.startswith(category))
+        
+        # items = [entry for entry in entries_b if entry.description == category and isinstance(entry, StockEntry) and entry.unit != '']
+        
+        # items = [entry for entry in entries_b if entry.description == category and isinstance(entry, StockEntry)]
+
+
+        # use is_type instead of isinstance to workaround issue in Streamlit
+        # https://github.com/streamlit/streamlit/issues/6765#issuecomment-1728170934
+        def is_type(val, t):
+            return str(type(val)) == str(t)
+
+        items = [entry for entry in entries_b if entry.description == category and is_type(entry, StockEntry)]
 
         category = transform_description(category)
 
         font_family = '"Source Code Pro", monospace'
         style = f"font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;"
 
-        # round total_a and total_b to 2 decimal places
-
         total_a = round(total_a, 2)
         total_b = round(total_b, 2)
 
-        if total_a != total_b:
-            diff = total_b - total_a
-            color = "green" if diff > 0 else "red"  # Green for positive, Red for negative
-            # st.write(f"{category}: {total_b} :{color}-background[{diff:+.2f}]")
-            # output += f"{category:<{max_category_length}}: {total_b:>5} ({diff:+.2f})\n"
-            # st.html(f"<span style='color: {color};'>{category:<{max_category_length}}: {total_b:>5} ({diff:+.2f})</span>")
-            # st.html(f"<span style='font-family:monospace; white-space:pre; background-color: lightgray;'>{category:<{max_category_length}}: {total_b:>5} <span style='color: {color}'>({diff:+.2f})</span></span>")
-            # output += f"<div style='font-family:monospace; white-space:pre; background-color: lightgray;'>{category:<{max_category_length}}: {total_b:>5} <span style='color: {color}'>({diff:+.2f})</span></div>"
-            # output += f"<div style='font-family:monospace; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>5} <span style='color: {color}'>({diff:+.2f})</span></div>"
-            # output += f"<div style='font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>5} <span style='color: {color}'>({diff:+.2f})</span></div>"
-            output += f"<div style='{style}'>{category:<{max_category_length}}: {total_b:>7} <span style='color: {color}'>({diff:+.2f})</span></div>"
+        # st.text(f'{len(items)=}')
+
+        if len(items) > 0:
+
+            item = items[0]
+
+            # if total_a != total_b:
+            #     diff = total_b - total_a
+            #     color = "green" if diff > 0 else "red"
             
+            output += fixed_width_text(f"{category:<{max_category_length}}: {total_b:>7} {item.quantity:>7} {item.unit} @ {item.price_per_unit}")
+
         else:
-            # st.write(f"{category}: {total_b}")
-            # output += f"{category:<{max_category_length}}: {total_b:>5}\n"
-            # output += f"<div style='font-family:monospace; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>5}</div>"
-            
-            output += f"<div style='font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>7}</div>"
+            if total_a != total_b:
+                diff = total_b - total_a
+                color = "green" if diff > 0 else "red"  # Green for positive, Red for negative
+                output += f"<div style='{style}'>{category:<{max_category_length}}: {total_b:>7} <span style='color: {color}'>({diff:+.2f})</span></div>"
+            else:            
+                output += f"<div style='font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>7}</div>"        
+
+
+
+        # if total_a != total_b:
+        #     diff = total_b - total_a
+        #     color = "green" if diff > 0 else "red"  # Green for positive, Red for negative
+        #     output += f"<div style='{style}'>{category:<{max_category_length}}: {total_b:>7} <span style='color: {color}'>({diff:+.2f})</span></div>"
+        # else:            
+        #     output += f"<div style='font-family:{font_family}; font-size: 14px; white-space:pre; background-color: #F8F9FB;'>{category:<{max_category_length}}: {total_b:>7}</div>"
 
     # st.code(output)
 
@@ -687,8 +778,9 @@ def history_of_balances(ledger: Ledger, display_gold=False):
         # st.write(f'money_supply:     {money_supply(tmp_ledger)}')
 
         # display_money_supply(tmp_ledger)
-        
-        st.html(fixed_width_text(f'Money multiplier: {money_multiplier(tmp_ledger):.2f}'))  
+
+        if (monetary_base(tmp_ledger) != 0):
+            st.html(fixed_width_text(f'Money multiplier: {money_multiplier(tmp_ledger):.2f}'))  
 
         display_amounts_available_for_loan(tmp_ledger)
 # ----------------------------------------------------------------------

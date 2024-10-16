@@ -30,25 +30,30 @@ st.sidebar.markdown(f'Max money multiplier: {1 / reserve_ratio:.2f}')
 
 #         st.session_state.ledger = Ledger()
 
-if 'ledger' not in st.session_state:
+# if 'ledger' not in st.session_state:
 
-    if 'ledger' in st.query_params:
+#     if 'ledger' in st.query_params:
 
-        encoded_ledger = st.query_params.ledger
+#         encoded_ledger = st.query_params.ledger
 
-        serialized_ledger = base64.urlsafe_b64decode(encoded_ledger)
+#         serialized_ledger = base64.urlsafe_b64decode(encoded_ledger)
 
-        # ledger = pickle.loads(serialized_ledger)
+#         # ledger = pickle.loads(serialized_ledger)
 
-        st.session_state.ledger = pickle.loads(serialized_ledger)
+#         st.session_state.ledger = pickle.loads(serialized_ledger)
 
-    else:
+#     else:
 
-        st.session_state.ledger = Ledger()
+#         st.session_state.ledger = Ledger()
 
 # ledger = Ledger()
 
+if 'ledger' not in st.session_state:
+
+    st.session_state.ledger = Ledger()
+
 ledger = st.session_state.ledger
+
 
 # st.sidebar.markdown(f'Monetary base: {monetary_base(ledger):.2f}')
 
@@ -555,6 +560,29 @@ with st.sidebar.expander("Central Banking 101", expanded=False):
     st.button('simple',   on_click=cb101_ch1_ex2_simple)
     st.button('with Fed', on_click=cb101_ch1_ex2_with_fed)
     st.button('full',     on_click=cb101_ch1_ex2_full)
+
+
+def stock_example_01():
+
+    with st.sidebar.expander('Stock', expanded=False):
+
+        with st.echo():
+
+            ledger.transactions.append(
+                Transaction(
+                    date='2020-01-01',
+                    description=f'corp issues stock',
+                    entries=[
+                        # Entry('person_a:assets:stock', 0, quantity= 10, unit='CORP', price_per_unit=1),
+                        # Entry('corp:equity:stock',     0, quantity=-10, unit='CORP', price_per_unit=1)
+                        StockEntry('person_a:assets:stock',  10, 'CORP', 3),
+                        StockEntry('corp:equity:stock',     -10, 'CORP', 3)
+                    ]
+                )
+            )
+
+st.sidebar.button('Stock example 01', on_click=stock_example_01)
+
 # ----------------------------------------------------------------------
 st.sidebar.divider()
 
@@ -580,3 +608,14 @@ history_of_balances(ledger, display_gold=show_gold)
 # encoded_ledger = base64.urlsafe_b64encode(serialized_ledger).decode('utf-8')
 
 # st.query_params.ledger = encoded_ledger
+
+
+# st.write(
+#     [
+#         BasicEntry('abc', 10),
+#         StockEntry('bcd', 10, 'TSLA', 1)
+#     ]
+# ) 
+
+# st.write(ledger.entries())
+
